@@ -10,8 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GAJA">
         <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDtFJdGuO4L_BTQ_HjDrjm63GfPszp3fhg"/>
+            android:name="com.google.android.geo.API_KEY"/>
         <activity
             android:name=".Login_MainActivity"
             android:exported="true">
