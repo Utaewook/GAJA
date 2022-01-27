@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:scaleType="fitCenter"
+        android:layout_marginTop="70dp"
+        android:layout_gravity="center"
+        android:src="@drawable/mountain"/>
+
+    <EditText
+        android:id="@+id/login_id"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="20dp"
+        android:backgroundTint="#B3ADAD"
+        android:ems="40"
+        android:hint="아이디"
+        android:padding="7dp"
+        android:inputType="textPersonName" />
+
+    <EditText
+        android:id="@+id/login_pw"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:ems="40"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:backgroundTint="#B3ADAD"
+        android:padding="7dp"
+        android:inputType="textPassword"
+        android:hint="비밀번호"/>
+
+    <Button
+        android:id="@+id/login_loginBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="로그인"
+        android:textColor="@color/black"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:backgroundTint="#37aba1"
+        android:padding="12dp"/>
+    <Button
+        android:id="@+id/login_joinBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#00ff0000"
+        android:layout_marginTop="20dp"
+        android:hint="회원가입"
+        android:layout_gravity="center"
+        android:textColorHint="@color/black"/>
+
+</LinearLayout>
