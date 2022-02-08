@@ -90,6 +90,7 @@
                     android:textColor="@color/black"
                     android:layout_marginTop="20dp"
                     android:textSize="30dp"
+                    android:layout_gravity="center"
                     android:text="내 정보"/>
                 <TextView
                     android:layout_width="match_parent"
@@ -179,6 +180,16 @@
                     </TextView>
 
                 </LinearLayout>
+
+                <Button
+                    android:id="@+id/logout_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#00ff0000"
+                    android:layout_marginTop="20dp"
+                    android:hint="로그아웃"
+                    android:layout_gravity="center"
+                    android:textColorHint="@color/black"/>
 
             </LinearLayout>
 

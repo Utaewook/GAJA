@@ -3,9 +3,9 @@ plugins {
     id 'com.google.gms.google-services'
 }
 
-def propertiesFile = rootProject.file("local.properties")
-def properties = new Properties()
-properties.load(new FileInputStream(propertiesFile))
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def googleMapApiKey =properties.getProperty('mAgency_api_key')
 
 android {
     compileSdk 31
@@ -18,7 +18,8 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String","API_KEY",properties["API_KEY"])
+        buildConfigField("String","mAgency_api_key",properties["mAgency_api_key"])
+        manifestPlaceholders = [googleMapApiKey:googleMapApiKey]
     }
 
     buildTypes {

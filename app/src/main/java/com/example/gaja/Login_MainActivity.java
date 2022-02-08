@@ -1,7 +1,6 @@
 package com.example.gaja;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -9,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -21,6 +21,7 @@ public class Login_MainActivity extends AppCompatActivity {
 
     Button joinButton;
     Button loginButton;
+    CheckBox loginAUTOCHECK;
 
     EditText loginIDEdt;
     EditText loginPWEdt;
@@ -37,6 +38,7 @@ public class Login_MainActivity extends AppCompatActivity {
 
         loginIDEdt = (EditText) findViewById(R.id.login_id);
         loginPWEdt = (EditText) findViewById(R.id.login_pw);
+        loginAUTOCHECK = (CheckBox) findViewById(R.id.login_autologin);
 
         joinButton = (Button) findViewById(R.id.login_joinBtn);
         joinButton.setOnClickListener(new View.OnClickListener() {
@@ -79,7 +81,8 @@ public class Login_MainActivity extends AppCompatActivity {
                                     return;
                                 }
 
-                                curUser.SetUserData(dbID,dbNickname,dbPW,dbCity);
+                                curUser.SetUserData(dbID,dbNickname,dbPW,dbCity,loginAUTOCHECK.isChecked());
+                                SaveSharedPreference.setUser(Login_MainActivity.this, curUser);
 
                                 Intent mainPage = new Intent(getApplicationContext(),Menu_MainActivity.class);
                                 mainPage.putExtra("id",curUser.GetID());

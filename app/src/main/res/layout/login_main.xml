@@ -39,6 +39,14 @@
         android:padding="7dp"
         android:inputType="textPassword"
         android:hint="비밀번호"/>
+    <CheckBox
+        android:id="@+id/login_autologin"
+        android:layout_gravity="right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="자동로그인"/>
 
     <Button
         android:id="@+id/login_loginBtn"
@@ -46,7 +54,6 @@
         android:layout_height="wrap_content"
         android:text="로그인"
         android:textColor="@color/black"
-        android:layout_marginTop="20dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:backgroundTint="#37aba1"

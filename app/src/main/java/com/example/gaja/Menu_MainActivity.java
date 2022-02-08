@@ -1,14 +1,10 @@
 package com.example.gaja;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.TabActivity;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.GradientDrawable;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -21,14 +17,10 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.type.Color;
-import com.google.type.LatLng;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,11 +42,11 @@ public class Menu_MainActivity extends TabActivity {
     LinearLayout anothercityll;
 
     Button addbutton;
+    Button logoutbutton;
 
     private final String[] CITY = {"서울","부산","대구","인천","광주","대전","울산"};
     private int myRouteCount = 0;
     private boolean countStarted = false;
-    private enum city {서울,부산,대구,인천,광주,대전,울산};
     private final double[][] latlngs = {{37.566400449054065, 126.97806415190496}, //서울 시청 좌표
                                         {35.17982606079264, 129.07499314916123}, //부산 시청 좌표
                                         {35.87138702960645, 128.60174586138197}, //대구 시청 좌표
@@ -74,10 +66,17 @@ public class Menu_MainActivity extends TabActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_menu);
 
-        Intent intent = getIntent();
-        currUser.SetID(intent.getStringExtra("id"));
-        currUser.SetNickname(intent.getStringExtra("nickname"));
-        currUser.SetCity(intent.getIntExtra("city",-1));
+        if(SaveSharedPreference.getUserAutoLogin(getApplicationContext()) == false) {
+            Intent intent = getIntent();
+            currUser.SetID(intent.getStringExtra("id"));
+            currUser.SetNickname(intent.getStringExtra("nickname"));
+            currUser.SetCity(intent.getIntExtra("city", -1));
+        }else{
+            currUser.SetID(SaveSharedPreference.getUserID(getApplicationContext()));
+            currUser.SetPassword(SaveSharedPreference.getUserPW(getApplicationContext()));
+            currUser.SetNickname(SaveSharedPreference.getUserNN(getApplicationContext()));
+            currUser.SetCity(SaveSharedPreference.getUserCity(getApplicationContext()));
+        }
 
         addbutton = (Button) findViewById(R.id.addRouteButton);
         addbutton.setOnClickListener(new View.OnClickListener() {
@@ -87,6 +86,18 @@ public class Menu_MainActivity extends TabActivity {
                 int city = currUser.GetCity();
                 mapIntent.putExtra("CENTER",latlngs[city]);
                 startActivity(mapIntent);
+            }
+        });
+
+        logoutbutton = (Button) findViewById(R.id.logout_btn);
+        logoutbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SaveSharedPreference.clearUser(getApplicationContext());
+                Toast.makeText(getApplicationContext(),"로그아웃 되었습니다.",Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getApplicationContext(),Login_MainActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
 
@@ -129,9 +140,21 @@ public class Menu_MainActivity extends TabActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        /*if(SaveSharedPreference.getUserID(getApplicationContext()).compareTo("")!=0) {
+            currUser.SetID(SaveSharedPreference.getUserID(getApplicationContext()));
+            currUser.SetPassword(SaveSharedPreference.getUserPW(getApplicationContext()));
+            currUser.SetNickname(SaveSharedPreference.getUserNN(getApplicationContext()));
+            currUser.SetCity(SaveSharedPreference.getUserCity(getApplicationContext()));
+        }*/
         setRecommendll();
         setMyRoutell();
         setAnotherCityll();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (currUser.GetAutoLogin()) SaveSharedPreference.setUser(getApplicationContext(),currUser);
     }
 
     private void setRecommendll(){
@@ -147,7 +170,7 @@ public class Menu_MainActivity extends TabActivity {
                             String db_routename = document.getString("routename");
                             String db_nickname = document.getString("nickname");
 
-                            makeNewContents(recommendll,db_routename,db_nickname,db_city,db_routeDots,false);
+                            makeNewContents(recommendll,db_routename,db_nickname,db_city,db_routeDots);
                         }else{
                             Toast.makeText(getApplicationContext(),"아직 내 도시의 경로가 없습니다.",Toast.LENGTH_SHORT).show();
                         }
@@ -176,7 +199,7 @@ public class Menu_MainActivity extends TabActivity {
                             myRouteCount++;
                             countStarted = true;
 
-                            makeNewContents(myroutell,db_routename,db_nickname,db_city,db_routeDots,true);
+                            makeNewContents(myroutell,db_routename,db_nickname,db_city,db_routeDots);
                         }
                     }
                     setMyInfoTab();
@@ -201,7 +224,7 @@ public class Menu_MainActivity extends TabActivity {
                             String db_routename = document.getString("routename");
                             String db_nickname = document.getString("nickname");
 
-                            makeNewContents(anothercityll,db_routename,db_nickname,db_city,db_routeDots,false);
+                            makeNewContents(anothercityll,db_routename,db_nickname,db_city,db_routeDots);
                         }
                     }
                 }else{
@@ -217,10 +240,10 @@ public class Menu_MainActivity extends TabActivity {
         if(countStarted)
             routecountTV.setText(Integer.toString(myRouteCount)+" 개");
         else
-            routecountTV.setText("불러 오는중..");
+            routecountTV.setText("-");
     }
 
-    private void makeNewContents(LinearLayout layout,String routeName,String nickname,int city,ArrayList<HashMap> dots,boolean removeable){
+    private void makeNewContents(LinearLayout layout,String routeName,String nickname,int city,ArrayList<HashMap> dots){
         LinearLayout templl = new LinearLayout(getApplicationContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
         TextView usertv = new TextView(getApplicationContext());
