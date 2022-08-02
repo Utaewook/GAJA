@@ -26,22 +26,22 @@ import java.util.HashMap;
 
 public class Menu_MainActivity extends TabActivity {
 
-    TabHost tabHost;
-    TabHost.TabSpec recommendSpec;
-    TabHost.TabSpec myRouteSpec;
-    TabHost.TabSpec anotherCitySpec;
-    TabHost.TabSpec myInfoSpec;
+    private TabHost tabHost;
+    private TabHost.TabSpec recommendSpec;
+    private TabHost.TabSpec myRouteSpec;
+    private TabHost.TabSpec anotherCitySpec;
+    private TabHost.TabSpec myInfoSpec;
 
-    TextView nicknameTV;
-    TextView cityTV;
-    TextView routecountTV;
+    private TextView nicknameTV;
+    private TextView cityTV;
+    private TextView routecountTV;
 
-    LinearLayout recommendll;
-    LinearLayout myroutell;
-    LinearLayout anothercityll;
+    private LinearLayout recommendll;
+    private LinearLayout myroutell;
+    private LinearLayout anothercityll;
 
-    Button addbutton;
-    Button logoutbutton;
+    private Button addbutton;
+    private Button logoutbutton;
 
     private final String[] CITY = {"서울","부산","대구","인천","광주","대전","울산"};
     private int myRouteCount = 0;
@@ -55,8 +55,8 @@ public class Menu_MainActivity extends TabActivity {
                                         {35.53969222181237, 129.31149541054342} //울산 시청좌표
                                         };
 
-    FirebaseFirestore database = FirebaseFirestore.getInstance();
-    CurrentLoginedUser currUser = CurrentLoginedUser.GetInstance();
+    private FirebaseFirestore database = FirebaseFirestore.getInstance();
+    private CurrentLoginedUser currUser = CurrentLoginedUser.GetInstance();
 
     private final String DB_ROUTE_TABLE = "ROUTES";
 

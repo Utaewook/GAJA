@@ -13,10 +13,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -24,8 +21,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import com.naver.maps.geometry.LatLng;
 import com.naver.maps.map.CameraUpdate;
+import com.naver.maps.map.MapFragment;
 import com.naver.maps.map.NaverMap;
 import com.naver.maps.map.OnMapReadyCallback;
+import com.naver.maps.map.overlay.PathOverlay;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,15 +37,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private final String[] CITY = {"서울","부산","대구","인천","광주","대전","울산"};
 
     private boolean canIdraw = false;
-    private ArrayList<LatLng> myRouteDots = new ArrayList<LatLng>();
-    private Polyline myRoute;
+    private ArrayList<LatLng> myPathDots = new ArrayList<LatLng>();
+    private PathOverlay myPath;
 
-    Switch mapdrawSwitch;
-    Button saveRouteButton;
-    EditText routeNameEDT;
+    private Switch mapdrawSwitch;
+    private Button saveRouteButton;
+    private EditText routeNameEDT;
 
-    FirebaseFirestore database = FirebaseFirestore.getInstance();
-    CurrentLoginedUser currUser = CurrentLoginedUser.GetInstance();
+    private FirebaseFirestore database = FirebaseFirestore.getInstance();
+    private CurrentLoginedUser currUser = CurrentLoginedUser.GetInstance();
 
 
     @Override
@@ -72,7 +71,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             boolean routenameDup = true;
             @Override
             public void onClick(View v) {
-                if(myRouteDots.isEmpty()||myRouteDots.size()==1){
+                if(myPathDots.isEmpty()||myPathDots.size()==1){
                     Toast.makeText(getApplicationContext(),"산책로를 선택해주세요",Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -88,7 +87,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 route_save.put("routename",routeNameInput);
                 route_save.put("nickname",currUser.GetNickname());
                 route_save.put("city",currUser.GetCity());
-                route_save.put("dots",myRouteDots);
+                route_save.put("dots",myPathDots);
                 database.collection(DB_ROUTES_TABLE).document(id).set(route_save).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
@@ -106,9 +105,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 });
             }
         });
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync();
+        FragmentManager fm = getSupportFragmentManager();
+        MapFragment mapFragment = (MapFragment) fm.findFragmentById(R.id.map);
+        if(mapFragment == null){
+            mapFragment = MapFragment.newInstance();
+            fm.beginTransaction().add(R.id.map,mapFragment).commit();
+        }
     }
 
 
@@ -117,15 +119,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         map.setMinZoom(5);
         map.moveCamera(CameraUpdate.scrollTo(CENTER));
 
-        PolylineOptions myRouteOptions = new PolylineOptions();
-
         map.setOnMapClickListener(new NaverMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull PointF pointF, @NonNull LatLng latLng) {
                 if(canIdraw) {
-                    myRouteOptions.add(latLng);
-                    myRouteDots.add(latLng);
-                    //myRoute = map.addPolyline(myRouteOptions); // polyline 맵에 그리기
+                    myPathDots.add(latLng);
+                    myPath.setCoords(myPathDots);
+                    myPath.setMap(map);
                 }
             }
         });

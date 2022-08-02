@@ -14,5 +14,14 @@ public class InitActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.init_main);
 
+        if(SaveSharedPreference.getUserAutoLogin(getApplicationContext()) == false){
+            intent = new Intent(InitActivity.this, Login_MainActivity.class);
+            startActivity(intent);
+            this.finish();
+        }else{
+            intent = new Intent(InitActivity.this, Menu_MainActivity.class);
+            startActivity(intent);
+            this.finish();
+        }
     }
 }

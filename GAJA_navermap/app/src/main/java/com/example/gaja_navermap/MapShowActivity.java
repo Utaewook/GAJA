@@ -12,45 +12,49 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import com.naver.maps.geometry.LatLng;
+import com.naver.maps.map.CameraUpdate;
+import com.naver.maps.map.MapFragment;
 import com.naver.maps.map.NaverMap;
 import com.naver.maps.map.OnMapReadyCallback;
+import com.naver.maps.map.overlay.PathOverlay;
 
 import java.util.ArrayList;
 
 public class MapShowActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static LatLng CENTER;
-    private ArrayList<double[]> dots_draw;
+    private ArrayList<LatLng> dots_draw;
     private double[] dots_input;
-    private Polyline myRoute;
 
-    TextView nicknametv;
-    TextView routenametv;
-    Button removeButton;
+    private TextView nickNametv;
+    private TextView routeNametv;
+    private Button removeButton;
+
 
     private String city;
     private String nickname;
-    private String routename;
-    private boolean removeable;
+    private String routeName;
+    private boolean removable;
 
     private final String[] CITY = {"서울","부산","대구","인천","광주","대전","울산"};
     private final String DB_ROUTE_TABLE = "ROUTES";
-    FirebaseFirestore database = FirebaseFirestore.getInstance();
-    CurrentLoginedUser currUser = CurrentLoginedUser.GetInstance();
+    private FirebaseFirestore database = FirebaseFirestore.getInstance();
+    private CurrentLoginedUser currUser = CurrentLoginedUser.GetInstance();
 
     protected void getIntentInfo(){
         Intent thisIntent = getIntent();
         city = thisIntent.getStringExtra("cityString");
         nickname = thisIntent.getStringExtra("nickname");
-        routename = thisIntent.getStringExtra("routename");
-        removeable = thisIntent.getBooleanExtra("removeable",false);
+        routeName = thisIntent.getStringExtra("routename");
+        removable = thisIntent.getBooleanExtra("removeable",false);
         dots_input =  thisIntent.getDoubleArrayExtra("dots");
+        CENTER = new LatLng(dots_input[0],dots_input[1]);
     }
 
     @Override
@@ -59,12 +63,12 @@ public class MapShowActivity extends AppCompatActivity implements OnMapReadyCall
         setContentView(R.layout.mapshow);
         getIntentInfo();
 
-        nicknametv = (TextView) findViewById(R.id.mapshow_nicknametv);
-        routenametv = (TextView) findViewById(R.id.mapshow_routenametv);
+        nickNametv = (TextView) findViewById(R.id.mapshow_nicknametv);
+        routeNametv = (TextView) findViewById(R.id.mapshow_routenametv);
         removeButton = (Button) findViewById(R.id.routeDeleteButton);
 
-        removeButton.setEnabled(removeable);
-        removeButton.setVisibility(removeable?View.VISIBLE:View.INVISIBLE);
+        removeButton.setEnabled(removable);
+        removeButton.setVisibility(removable ?View.VISIBLE:View.INVISIBLE);
         removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,7 +78,7 @@ public class MapShowActivity extends AppCompatActivity implements OnMapReadyCall
                 dlg.setPositiveButton("삭제", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String id = city+"_"+currUser.GetNickname()+"_"+routename;
+                        String id = city+"_"+currUser.GetNickname()+"_"+ routeName;
                         database.collection(DB_ROUTE_TABLE).document(id).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
@@ -94,34 +98,34 @@ public class MapShowActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
 
-        nicknametv.setText(city+"에 사는 "+nickname+"님의 산책로");
-        routenametv.setText(routename);
+        nickNametv.setText(city+"에 사는 "+nickname+"님의 산책로");
+        routeNametv.setText(routeName);
 
         dots_draw = convertDotsArray(dots_input);
-        CENTER = new LatLng(dots_input[0],dots_input[1]);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapshow);
-        mapFragment.getMapAsync(this);
+        FragmentManager fm = getSupportFragmentManager();
+        MapFragment mapFragment = (MapFragment) fm.findFragmentById(R.id.mapshow);
+        if(mapFragment == null){
+            mapFragment = MapFragment.newInstance();
+            fm.beginTransaction().add(R.id.mapshow,mapFragment).commit();
+        }
     }
 
     @Override
-    public void onMapReady(@NonNull NaverMap googleMap) {
-        googleMap.setMinZoomPreference(5);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CENTER, 15));
-
-        PolylineOptions myRouteOptions = new PolylineOptions();
-
-        for(int i = 0 ;i<dots_draw.size();i++)
-            myRouteOptions.add(new LatLng(dots_draw.get(i)[0],dots_draw.get(i)[1]));
-
-        myRoute = googleMap.addPolyline(myRouteOptions);
-        googleMap.addMarker(new MarkerOptions().position(CENTER).title("산책로 시작점"));
+    public void onMapReady(@NonNull NaverMap map) {
+        map.setMinZoom(5);
+        map.moveCamera(CameraUpdate.scrollTo(CENTER));
+        PathOverlay myPath = new PathOverlay();
+        myPath.setCoords(dots_draw);
+        myPath.setMap(map);
+//      googleMap.addMarker(new MarkerOptions().position(CENTER).title("산책로 시작점"));
     }
-    private ArrayList<double[]> convertDotsArray(double[] src_dots){
-        ArrayList<double[]> convertedDots = new ArrayList<double[]>();
+
+    private ArrayList<LatLng> convertDotsArray(double[] src_dots){
+        ArrayList<LatLng> convertedDots = new ArrayList<LatLng>();
 
         for(int i=0;i<src_dots.length/2;i++){
-            convertedDots.add(i,new double[] {src_dots[2*i],src_dots[2*i+1]});
+            convertedDots.add(i,new LatLng(src_dots[2*i],src_dots[2*i+1]));
         }
         return convertedDots;
     }

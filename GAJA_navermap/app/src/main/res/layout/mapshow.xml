@@ -37,12 +37,19 @@
             android:textColor="@color/black"/>
     </LinearLayout>
 
-    <com.naver.maps.map.MapView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <fragment
         android:id="@+id/mapshow"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.example.polygons.PolyActivity" />
+        android:name="com.naver.maps.map.MapFragment"/>
+
+
+<!--    <com.naver.maps.map.MapView-->
+<!--        xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--        xmlns:tools="http://schemas.android.com/tools"-->
+<!--        android:id="@+id/mapshow"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        tools:context="com.example.polygons.PolyActivity" />-->
 
 </LinearLayout>
