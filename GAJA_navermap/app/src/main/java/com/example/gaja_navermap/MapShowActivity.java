@@ -3,7 +3,9 @@ package com.example.gaja_navermap;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -11,7 +13,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -26,7 +30,7 @@ import com.naver.maps.map.overlay.PathOverlay;
 
 import java.util.ArrayList;
 
-public class MapShowActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapShowActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static LatLng CENTER;
     private ArrayList<LatLng> dots_draw;
@@ -104,21 +108,23 @@ public class MapShowActivity extends AppCompatActivity implements OnMapReadyCall
         dots_draw = convertDotsArray(dots_input);
 
         FragmentManager fm = getSupportFragmentManager();
-        MapFragment mapFragment = (MapFragment) fm.findFragmentById(R.id.mapshow);
+        MapFragment mapFragment = (MapFragment) fm.findFragmentById(R.id.mapshow_fragment);
         if(mapFragment == null){
             mapFragment = MapFragment.newInstance();
-            fm.beginTransaction().add(R.id.mapshow,mapFragment).commit();
+            fm.beginTransaction().add(R.id.mapshow_fragment,mapFragment).commit();
         }
+        mapFragment.getMapAsync(this);
     }
 
+    @UiThread
     @Override
     public void onMapReady(@NonNull NaverMap map) {
         map.setMinZoom(5);
         map.moveCamera(CameraUpdate.scrollTo(CENTER));
         PathOverlay myPath = new PathOverlay();
+        myPath.setColor(Color.BLACK);
         myPath.setCoords(dots_draw);
         myPath.setMap(map);
-//      googleMap.addMarker(new MarkerOptions().position(CENTER).title("산책로 시작점"));
     }
 
     private ArrayList<LatLng> convertDotsArray(double[] src_dots){
