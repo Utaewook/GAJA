@@ -25,11 +25,13 @@
         <activity android:name=".Login_MainActivity"/>
         <activity android:name=".Join_MainActivity"/>
         <activity android:name=".Menu_MainActivity"/>
-        <activity android:name=".MapActivity"/>
+        <activity android:name=".MapActivity"
+            android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".MapShowActivity"/>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
-        tools:ignore="CoarseFineLocation" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 </manifest>

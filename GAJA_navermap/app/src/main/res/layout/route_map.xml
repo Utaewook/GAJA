@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -9,72 +8,41 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="5">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="4"
-            android:text="경로명"
-            android:textColor="@color/black"
-            android:textSize="30dp"/>
+        android:gravity="bottom"
+        android:layout_alignParentBottom="true"
+        android:weightSum="5"
+        android:layout_gravity="bottom">
         <EditText
             android:id="@+id/edt_routename"
             android:layout_width="250dp"
             android:layout_height="match_parent"
-            android:hint="나만의 경로명"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="5">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="4"
-            android:text="경로 그리기"
-            android:textColor="@color/black"
-            android:textSize="30dp"/>
+            android:hint="나만의 경로명"
+            android:layout_weight="3"/>
 
         <Switch
             android:id="@+id/mapdraw_Switch"
-            android:layout_width="30dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:foregroundGravity="right" />
-
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="5">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="4"
-            android:text="경로 저장하기"
-            android:textColor="@color/black"
-            android:textSize="30dp"/>
 
         <Button
             android:id="@+id/mapdrawSaveButton"
-            android:layout_width="30dp"
+            android:layout_width="40dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:backgroundTint="@color/mountain"
+            android:foregroundGravity="right"
             android:text="저장"
             android:textColor="@color/black"
-            android:foregroundGravity="right" />
+            android:textSize="10dp" />
 
     </LinearLayout>
 
     <fragment
         android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:name="com.naver.maps.map.MapFragment" />
 
-</LinearLayout>
+</RelativeLayout>

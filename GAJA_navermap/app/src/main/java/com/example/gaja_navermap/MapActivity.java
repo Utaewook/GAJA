@@ -1,10 +1,12 @@
 package com.example.gaja_navermap;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -111,6 +113,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             mapFragment = MapFragment.newInstance();
             fm.beginTransaction().add(R.id.map,mapFragment).commit();
         }
+        mapFragment.getMapAsync(this);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
     }
 
 
@@ -118,14 +122,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(NaverMap map) {
         map.setMinZoom(5);
         map.moveCamera(CameraUpdate.scrollTo(CENTER));
+        myPath = new PathOverlay();
+        myPath.setColor(Color.GREEN);
 
         map.setOnMapClickListener(new NaverMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull PointF pointF, @NonNull LatLng latLng) {
                 if(canIdraw) {
                     myPathDots.add(latLng);
-                    myPath.setCoords(myPathDots);
-                    myPath.setMap(map);
+                    if(myPathDots.size()>=2) {
+                        myPath.setCoords(myPathDots);
+                        myPath.setMap(map);
+                    }
                 }
             }
         });
