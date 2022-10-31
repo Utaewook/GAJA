@@ -1,7 +1,6 @@
 package com.example.gaja_navermap;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,7 +12,6 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
@@ -70,6 +68,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         saveRouteButton = (Button) findViewById(R.id.mapdrawSaveButton);
         saveRouteButton.setOnClickListener(new View.OnClickListener() {
+            boolean routenameDup = true;
             @Override
             public void onClick(View v) {
                 if(myPathDots.isEmpty()||myPathDots.size()==1){
@@ -112,26 +111,21 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             mapFragment = MapFragment.newInstance();
             fm.beginTransaction().add(R.id.map,mapFragment).commit();
         }
-        mapFragment.getMapAsync(this);
     }
 
-    @UiThread
+
     @Override
     public void onMapReady(NaverMap map) {
         map.setMinZoom(5);
         map.moveCamera(CameraUpdate.scrollTo(CENTER));
-        myPath = new PathOverlay();
-        myPath.setColor(Color.GREEN);
 
         map.setOnMapClickListener(new NaverMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull PointF pointF, @NonNull LatLng latLng) {
                 if(canIdraw) {
                     myPathDots.add(latLng);
-                    if(myPathDots.size()>=2) {
-                        myPath.setCoords(myPathDots);
-                        myPath.setMap(map);
-                    }
+                    myPath.setCoords(myPathDots);
+                    myPath.setMap(map);
                 }
             }
         });

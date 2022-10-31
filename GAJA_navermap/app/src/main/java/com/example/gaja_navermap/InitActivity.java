@@ -9,6 +9,8 @@ import androidx.annotation.Nullable;
 public class InitActivity extends Activity {
     private Intent intent;
 
+    public static int pc = 0;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

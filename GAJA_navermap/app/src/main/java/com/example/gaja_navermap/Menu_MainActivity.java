@@ -46,7 +46,7 @@ public class Menu_MainActivity extends TabActivity {
     private final String[] CITY = {"서울","부산","대구","인천","광주","대전","울산"};
     private int myRouteCount = 0;
     private boolean countStarted = false;
-    private final double[][] latlngs = {{37.566400449054065, 126.97806415190496}, //서울 시청 좌표
+    private final double[][] city_latlngs = {{37.566400449054065, 126.97806415190496}, //서울 시청 좌표
                                         {35.17982606079264, 129.07499314916123}, //부산 시청 좌표
                                         {35.87138702960645, 128.60174586138197}, //대구 시청 좌표
                                         {37.456191773597624, 126.70590628875505}, //인천 시청좌표
@@ -83,7 +83,7 @@ public class Menu_MainActivity extends TabActivity {
             public void onClick(View v) {
                 Intent mapIntent = new Intent(getApplicationContext(),MapActivity.class);
                 int city = currUser.GetCity();
-                mapIntent.putExtra("CENTER",latlngs[city]);
+                mapIntent.putExtra("CENTER", city_latlngs[city]);
                 startActivity(mapIntent);
             }
         });
