@@ -26,7 +26,7 @@
         <activity android:name=".Join_MainActivity"/>
         <activity android:name=".Menu_MainActivity"/>
         <activity android:name=".MapActivity"
-            android:windowSoftInputMode="adjustNothing"/>
+            android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".MapShowActivity"/>
     </application>
 

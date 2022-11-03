@@ -35,6 +35,7 @@ public class Login_MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_main);
+        setTitle("GAJA");
 
         loginIDEdt = (EditText) findViewById(R.id.login_id);
         loginPWEdt = (EditText) findViewById(R.id.login_pw);

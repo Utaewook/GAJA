@@ -52,6 +52,7 @@ public class Join_MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.join_main);
+        setTitle("회원가입");
 
         editTxtID = (EditText)findViewById(R.id.join_id);
         editTxtNickname = (EditText)findViewById(R.id.join_nickname);

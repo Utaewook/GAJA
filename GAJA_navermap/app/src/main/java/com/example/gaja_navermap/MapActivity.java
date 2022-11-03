@@ -54,6 +54,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.route_map);
+        setTitle("나만의 경로 만들기");
 
         Intent thisIntent = getIntent();
         CENTER = new LatLng(thisIntent.getDoubleArrayExtra("CENTER")[0],thisIntent.getDoubleArrayExtra("CENTER")[1]);
@@ -107,6 +108,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 });
             }
         });
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         FragmentManager fm = getSupportFragmentManager();
         MapFragment mapFragment = (MapFragment) fm.findFragmentById(R.id.map);
         if(mapFragment == null){
@@ -114,7 +116,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             fm.beginTransaction().add(R.id.map,mapFragment).commit();
         }
         mapFragment.getMapAsync(this);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+
     }
 
 

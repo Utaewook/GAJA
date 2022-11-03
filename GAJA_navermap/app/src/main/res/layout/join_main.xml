@@ -10,9 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="20dp"
         android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp">
+        android:layout_marginRight="20dp"
+        android:gravity="center">
 
         <ImageView
             android:layout_width="100dp"
@@ -20,14 +21,6 @@
             android:scaleType="fitCenter"
             android:layout_gravity="left"
             android:src="@drawable/mountain2"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="회원가입"
-            android:textColor="@color/black"
-            android:textSize="30dp"
-            android:textAlignment="center"/>
 
     </LinearLayout>
     <TableLayout
