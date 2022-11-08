@@ -20,6 +20,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.naver.maps.geometry.LatLng;
+import com.naver.maps.map.util.FusedLocationSource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,14 +59,17 @@ public class Menu_MainActivity extends TabActivity {
 
     private FirebaseFirestore database = FirebaseFirestore.getInstance();
     private CurrentLoginedUser currUser = CurrentLoginedUser.GetInstance();
+    private FusedLocationSource locationSource;
 
     private final String DB_ROUTE_TABLE = "ROUTES";
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_menu);
 
+        // 현재 접속 사용자 정보 가져오기
         if(SaveSharedPreference.getUserAutoLogin(getApplicationContext()) == false) {
             Intent intent = getIntent();
             currUser.SetID(intent.getStringExtra("id"));
@@ -76,6 +81,10 @@ public class Menu_MainActivity extends TabActivity {
             currUser.SetNickname(SaveSharedPreference.getUserNN(getApplicationContext()));
             currUser.SetCity(SaveSharedPreference.getUserCity(getApplicationContext()));
         }
+
+        // 사용자에게 위치 권한 요구
+        locationSource = new FusedLocationSource(this,LOCATION_PERMISSION_REQUEST_CODE);
+
 
         addbutton = (Button) findViewById(R.id.addRouteButton);
         addbutton.setOnClickListener(new View.OnClickListener() {
@@ -148,6 +157,18 @@ public class Menu_MainActivity extends TabActivity {
     protected void onPause() {
         super.onPause();
         if (currUser.GetAutoLogin()) SaveSharedPreference.setUser(getApplicationContext(),currUser);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (locationSource.onRequestPermissionsResult(requestCode,permissions,grantResults)){
+            if(!locationSource.isActivated()){
+                Toast.makeText(getApplicationContext(), "위치 권한이 설정 되지 않았습니다.", Toast.LENGTH_SHORT).show();
+            }
+            currUser.SetLocationSource(locationSource);
+            return;
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private void setRecommendll(){

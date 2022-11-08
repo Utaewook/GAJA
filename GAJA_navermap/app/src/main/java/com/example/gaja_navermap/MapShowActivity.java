@@ -24,6 +24,7 @@ import com.naver.maps.map.CameraUpdate;
 import com.naver.maps.map.MapFragment;
 import com.naver.maps.map.NaverMap;
 import com.naver.maps.map.OnMapReadyCallback;
+import com.naver.maps.map.overlay.Marker;
 import com.naver.maps.map.overlay.PathOverlay;
 
 import java.util.ArrayList;
@@ -123,6 +124,11 @@ public class MapShowActivity extends FragmentActivity implements OnMapReadyCallb
         myPath.setColor(Color.BLACK);
         myPath.setCoords(dots_draw);
         myPath.setMap(map);
+
+        Marker start_point = new Marker();
+        start_point.setPosition(CENTER);
+        start_point.setCaptionText("출발점");
+        start_point.setMap(map);
     }
 
     private ArrayList<LatLng> convertDotsArray(double[] src_dots){

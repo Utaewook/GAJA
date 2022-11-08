@@ -3,5 +3,12 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="로딩중"
+        android:textColor="@color/black"
+        android:textSize="30dp"
+        android:gravity="center"/>
 
 </LinearLayout>

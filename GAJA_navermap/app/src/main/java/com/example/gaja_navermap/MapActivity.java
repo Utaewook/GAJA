@@ -1,12 +1,15 @@
 package com.example.gaja_navermap;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -57,9 +60,21 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         setTitle("나만의 경로 만들기");
 
         Intent thisIntent = getIntent();
-        CENTER = new LatLng(thisIntent.getDoubleArrayExtra("CENTER")[0],thisIntent.getDoubleArrayExtra("CENTER")[1]);
+        // CENTER = new LatLng(thisIntent.getDoubleArrayExtra("CENTER")[0],thisIntent.getDoubleArrayExtra("CENTER")[1]);
+        CENTER = new LatLng(currUser.GetLocationSource().getLastLocation().getLatitude(),currUser.GetLocationSource().getLastLocation().getLongitude());
 
         routeNameEDT = (EditText) findViewById(R.id.edt_routename);
+        routeNameEDT.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN) && (i == KeyEvent.KEYCODE_ENTER)) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(routeNameEDT.getWindowToken(), 0);    //hide keyboard
+                    return true;
+                }
+                return false;
+            }
+        });
 
         mapdrawSwitch = (Switch) findViewById(R.id.mapdraw_Switch);
         mapdrawSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -71,7 +86,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         saveRouteButton = (Button) findViewById(R.id.mapdrawSaveButton);
         saveRouteButton.setOnClickListener(new View.OnClickListener() {
-            boolean routenameDup = true;
             @Override
             public void onClick(View v) {
                 if(myPathDots.isEmpty()||myPathDots.size()==1){
@@ -136,6 +150,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         myPath.setCoords(myPathDots);
                         myPath.setMap(map);
                     }
+                }else{
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(routeNameEDT.getWindowToken(), 0);    //hide keyboard
                 }
             }
         });
