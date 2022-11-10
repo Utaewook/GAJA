@@ -44,17 +44,37 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
-                    <Button
-                        android:id="@+id/addRouteButton"
+                    <LinearLayout
+                        android:id="@+id/addRouteButtonLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="+"
-                        android:textSize="48dp"
-                        android:textAlignment="center"
-                        android:textColor="#a6a6a6"
-                        android:backgroundTint="@color/white">
+                        android:orientation="horizontal">
+                        <Button
+                            android:id="@+id/addRouteDrawButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="산책로 그리기"
+                            android:textSize="20dp"
+                            android:textAlignment="center"
+                            android:textColor="#a6a6a6"
+                            android:backgroundTint="@color/white">
 
-                    </Button>
+                        </Button>
+                        <Button
+                            android:id="@+id/addRouteWalkButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="산책로 걷기"
+                            android:textSize="20dp"
+                            android:textAlignment="center"
+                            android:textColor="#a6a6a6"
+                            android:backgroundTint="@color/white">
+
+                        </Button>
+
+                    </LinearLayout>
 
 
                 </LinearLayout>

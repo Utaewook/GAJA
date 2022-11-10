@@ -1,7 +1,9 @@
 package com.example.gaja_navermap;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.Bundle;
@@ -18,6 +20,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -26,10 +30,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import com.naver.maps.geometry.LatLng;
 import com.naver.maps.map.CameraUpdate;
+import com.naver.maps.map.LocationTrackingMode;
 import com.naver.maps.map.MapFragment;
 import com.naver.maps.map.NaverMap;
 import com.naver.maps.map.OnMapReadyCallback;
 import com.naver.maps.map.overlay.PathOverlay;
+import com.naver.maps.map.util.FusedLocationSource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,6 +58,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private FirebaseFirestore database = FirebaseFirestore.getInstance();
     private CurrentLoginedUser currUser = CurrentLoginedUser.GetInstance();
 
+    private NaverMap naverMap;
+    private FusedLocationSource locationSource;
+
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +69,17 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         setContentView(R.layout.route_map);
         setTitle("나만의 경로 만들기");
 
+        String[] permissions = {
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                //Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        };
+
+        checkPermissions(permissions);
         Intent thisIntent = getIntent();
-        // CENTER = new LatLng(thisIntent.getDoubleArrayExtra("CENTER")[0],thisIntent.getDoubleArrayExtra("CENTER")[1]);
-        CENTER = new LatLng(currUser.GetLocationSource().getLastLocation().getLatitude(),currUser.GetLocationSource().getLastLocation().getLongitude());
+
+        CENTER = new LatLng(thisIntent.getDoubleArrayExtra("CENTER")[0],thisIntent.getDoubleArrayExtra("CENTER")[1]);
+        // CENTER = new LatLng(currUser.GetLocationSource().getLastLocation().getLatitude(),currUser.GetLocationSource().getLastLocation().getLongitude());
 
         routeNameEDT = (EditText) findViewById(R.id.edt_routename);
         routeNameEDT.setOnKeyListener(new View.OnKeyListener() {
@@ -122,6 +140,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 });
             }
         });
+
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         FragmentManager fm = getSupportFragmentManager();
         MapFragment mapFragment = (MapFragment) fm.findFragmentById(R.id.map);
@@ -131,24 +150,44 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
         mapFragment.getMapAsync(this);
 
+        locationSource = new FusedLocationSource(this,LOCATION_PERMISSION_REQUEST_CODE);
+        Log.d("확인좀2", "onMapReady: "+locationSource.isActivated());
+
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (locationSource.onRequestPermissionsResult(requestCode,permissions,grantResults)){
+            if(!locationSource.isActivated()){
+                naverMap.setLocationTrackingMode(LocationTrackingMode.None);
+            }
+            return;
+        }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
 
     @Override
     public void onMapReady(NaverMap map) {
-        map.setMinZoom(5);
-        map.moveCamera(CameraUpdate.scrollTo(CENTER));
+        this.naverMap = map;
+        naverMap.setMinZoom(5);
+        //naverMap.setLocationSource(locationSource);
+        naverMap.moveCamera(CameraUpdate.scrollTo(CENTER));
+//        Log.d("확인좀", "onMapReady: "+locationSource.toString());
+//        Log.d("확인좀", "onMapReady: "+locationSource.isActivated());
+//        Log.d("확인좀", "onMapReady: lat = "+Double.toString(locationSource.getLastLocation().getLatitude()));
+//        Log.d("확인좀", "onMapReady: lng = "+Double.toString(locationSource.getLastLocation().getLongitude()));
         myPath = new PathOverlay();
         myPath.setColor(Color.GREEN);
 
-        map.setOnMapClickListener(new NaverMap.OnMapClickListener() {
+        naverMap.setOnMapClickListener(new NaverMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull PointF pointF, @NonNull LatLng latLng) {
                 if(canIdraw) {
                     myPathDots.add(latLng);
                     if(myPathDots.size()>=2) {
                         myPath.setCoords(myPathDots);
-                        myPath.setMap(map);
+                        myPath.setMap(naverMap);
                     }
                 }else{
                     InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
@@ -156,5 +195,28 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 }
             }
         });
+    }
+
+    protected void checkPermissions(String[] permissions){
+        ArrayList<String> targetList = new ArrayList<>();
+        for(int i = 0; i < permissions.length; i++){
+            String curPermission = permissions[i];
+            int permissionCheck = ContextCompat.checkSelfPermission(this,curPermission);
+            if(permissionCheck == PackageManager.PERMISSION_GRANTED){
+                Log.d("Permission granting/", "checkPermissions: " + curPermission + " 권한 있음");
+            }else {
+                Log.d("Permission granting/", "checkPermissions: " + curPermission + " 권한 없음");
+                if(ActivityCompat.shouldShowRequestPermissionRationale(this,curPermission)){
+                    Log.d("Permission granting/", "checkPermissions: " + curPermission + " 권한 설명 필요");
+                }else{
+                    targetList.add(curPermission);
+                }
+            }
+        }
+
+        String[] targets = new String[targetList.size()];
+        targetList.toArray(targets);
+
+        ActivityCompat.requestPermissions(this,targets,LOCATION_PERMISSION_REQUEST_CODE);
     }
 }

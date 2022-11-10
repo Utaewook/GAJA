@@ -1,7 +1,9 @@
 package com.example.gaja_navermap;
 
+import android.Manifest;
 import android.app.TabActivity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -13,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -21,7 +24,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.naver.maps.geometry.LatLng;
-import com.naver.maps.map.util.FusedLocationSource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,13 +43,16 @@ public class Menu_MainActivity extends TabActivity {
     private LinearLayout recommendll;
     private LinearLayout myroutell;
     private LinearLayout anothercityll;
+    private LinearLayout addroutebuttonll;
 
-    private Button addbutton;
+    private Button add_draw_button;
+    private Button add_walk_button;
     private Button logoutbutton;
 
     private final String[] CITY = {"서울","부산","대구","인천","광주","대전","울산"};
     private int myRouteCount = 0;
     private boolean countStarted = false;
+    private double[] latlng;
     private final double[][] city_latlngs = {{37.566400449054065, 126.97806415190496}, //서울 시청 좌표
                                         {35.17982606079264, 129.07499314916123}, //부산 시청 좌표
                                         {35.87138702960645, 128.60174586138197}, //대구 시청 좌표
@@ -59,19 +64,19 @@ public class Menu_MainActivity extends TabActivity {
 
     private FirebaseFirestore database = FirebaseFirestore.getInstance();
     private CurrentLoginedUser currUser = CurrentLoginedUser.GetInstance();
-    private FusedLocationSource locationSource;
 
     private final String DB_ROUTE_TABLE = "ROUTES";
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
+    private static final int ROUTE_RECOMMEND_DISTANCE_500 = 500;
+    private static final double LOCATIONSOURCE_LATLNG_FIND_FAIL = -1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_menu);
+        Intent intent = getIntent();
 
         // 현재 접속 사용자 정보 가져오기
         if(SaveSharedPreference.getUserAutoLogin(getApplicationContext()) == false) {
-            Intent intent = getIntent();
             currUser.SetID(intent.getStringExtra("id"));
             currUser.SetNickname(intent.getStringExtra("nickname"));
             currUser.SetCity(intent.getIntExtra("city", -1));
@@ -81,19 +86,36 @@ public class Menu_MainActivity extends TabActivity {
             currUser.SetNickname(SaveSharedPreference.getUserNN(getApplicationContext()));
             currUser.SetCity(SaveSharedPreference.getUserCity(getApplicationContext()));
         }
+        latlng = intent.getDoubleArrayExtra("latlng");
+        Log.d(this.getLocalClassName(), "onCreate: ("+Double.toString(latlng[0])+", "+Double.toString(latlng[1])+")");
 
-        // 사용자에게 위치 권한 요구
-        locationSource = new FusedLocationSource(this,LOCATION_PERMISSION_REQUEST_CODE);
+        String[] permissions = {
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        };
+
+        checkPermissions(permissions);
 
 
-        addbutton = (Button) findViewById(R.id.addRouteButton);
-        addbutton.setOnClickListener(new View.OnClickListener() {
+        addroutebuttonll = (LinearLayout) findViewById(R.id.addRouteButtonLayout);
+
+        add_draw_button = (Button) findViewById(R.id.addRouteDrawButton);
+        add_draw_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent mapIntent = new Intent(getApplicationContext(),MapActivity.class);
                 int city = currUser.GetCity();
                 mapIntent.putExtra("CENTER", city_latlngs[city]);
                 startActivity(mapIntent);
+            }
+        });
+
+        add_walk_button = (Button) findViewById(R.id.addRouteWalkButton);
+        add_walk_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
             }
         });
 
@@ -159,16 +181,27 @@ public class Menu_MainActivity extends TabActivity {
         if (currUser.GetAutoLogin()) SaveSharedPreference.setUser(getApplicationContext(),currUser);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (locationSource.onRequestPermissionsResult(requestCode,permissions,grantResults)){
-            if(!locationSource.isActivated()){
-                Toast.makeText(getApplicationContext(), "위치 권한이 설정 되지 않았습니다.", Toast.LENGTH_SHORT).show();
+    protected void checkPermissions(String[] permissions){
+        ArrayList<String> targetList = new ArrayList<>();
+        for(int i = 0; i < permissions.length; i++){
+            String curPermission = permissions[i];
+            int permissionCheck = ContextCompat.checkSelfPermission(this,curPermission);
+            if(permissionCheck == PackageManager.PERMISSION_GRANTED){
+                Log.d("Permission granting/", "checkPermissions: " + curPermission + " 권한 있음");
+            }else {
+                Log.d("Permission granting/", "checkPermissions: " + curPermission + " 권한 없음");
+                if(ActivityCompat.shouldShowRequestPermissionRationale(this,curPermission)){
+                    Log.d("Permission granting/", "checkPermissions: " + curPermission + " 권한 설명 필요");
+                }else{
+                    targetList.add(curPermission);
+                }
             }
-            currUser.SetLocationSource(locationSource);
-            return;
         }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        String[] targets = new String[targetList.size()];
+        targetList.toArray(targets);
+
+        ActivityCompat.requestPermissions(this,targets,101);
     }
 
     private void setRecommendll(){
@@ -184,9 +217,20 @@ public class Menu_MainActivity extends TabActivity {
                             String db_routename = document.getString("routename");
                             String db_nickname = document.getString("nickname");
 
-                            makeNewContents(recommendll,db_routename,db_nickname,db_city,db_routeDots);
+                            makeNewContents(recommendll, db_routename, db_nickname, db_city, db_routeDots);
+//                            if (latlng[0] == LOCATIONSOURCE_LATLNG_FIND_FAIL || latlng[1] == LOCATIONSOURCE_LATLNG_FIND_FAIL){
+//                                Toast.makeText(getApplicationContext(),"근처의 추천 경로가 없습니다.",Toast.LENGTH_SHORT).show();
+//                            }else {
+//                                if (isRouteNearby(latlng, db_routeDots.get(0))) {  // 추천 알고리즘 근처 500미터 내의 경로를 보여준다
+//                                    int db_city = Integer.parseInt(document.get("city").toString());
+//                                    String db_routename = document.getString("routename");
+//                                    String db_nickname = document.getString("nickname");
+//
+//                                    makeNewContents(recommendll, db_routename, db_nickname, db_city, db_routeDots);
+//                                }
+//                            }
                         }else{
-                            Toast.makeText(getApplicationContext(),"아직 내 도시의 경로가 없습니다.",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(),"근처의 추천 경로가 없습니다.",Toast.LENGTH_SHORT).show();
                         }
                     }
                 }else{
@@ -217,7 +261,7 @@ public class Menu_MainActivity extends TabActivity {
                         }
                     }
                     setMyInfoTab();
-                    myroutell.addView(addbutton);
+                    myroutell.addView(addroutebuttonll);
                 }else{
                     Log.e("MYROUTE", "onComplete: 나만의 산책로 DB접근 에러");
                 }
@@ -255,6 +299,16 @@ public class Menu_MainActivity extends TabActivity {
             routecountTV.setText(Integer.toString(myRouteCount)+" 개");
         else
             routecountTV.setText("-");
+    }
+
+    private boolean isRouteNearby(double[] myPosition,HashMap starting_point){
+        LatLng mylocation = new LatLng(myPosition[0],myPosition[1]);
+        LatLng dest = new LatLng((double)starting_point.get("latitude"),(double)starting_point.get("longitude"));
+
+        double distance = mylocation.distanceTo(dest);
+
+        if(distance<ROUTE_RECOMMEND_DISTANCE_500) return true;
+        else return false;
     }
 
     private void makeNewContents(LinearLayout layout,String routeName,String nickname,int city,ArrayList<HashMap> dots){

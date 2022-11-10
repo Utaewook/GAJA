@@ -3,12 +3,19 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextView
+<!--    <TextView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:text="로딩중"-->
+<!--        android:textColor="@color/black"-->
+<!--        android:textSize="30dp"-->
+<!--        android:gravity="center"/>-->
+
+    <fragment
+        android:id="@+id/init_location_map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="로딩중"
-        android:textColor="@color/black"
-        android:textSize="30dp"
-        android:gravity="center"/>
+        android:name="com.naver.maps.map.MapFragment"
+        />
 
 </LinearLayout>
