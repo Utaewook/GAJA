@@ -62,6 +62,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private FusedLocationSource locationSource;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
+    private static final String[] permissions = {
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            //Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,13 +74,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         setContentView(R.layout.route_map);
         setTitle("나만의 경로 만들기");
 
-        String[] permissions = {
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                //Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-        };
 
         checkPermissions(permissions);
+
         Intent thisIntent = getIntent();
 
         CENTER = new LatLng(thisIntent.getDoubleArrayExtra("CENTER")[0],thisIntent.getDoubleArrayExtra("CENTER")[1]);
@@ -149,8 +150,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             fm.beginTransaction().add(R.id.map,mapFragment).commit();
         }
         mapFragment.getMapAsync(this);
-
         locationSource = new FusedLocationSource(this,LOCATION_PERMISSION_REQUEST_CODE);
+
         Log.d("확인좀2", "onMapReady: "+locationSource.isActivated());
 
     }
@@ -171,10 +172,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(NaverMap map) {
         this.naverMap = map;
         naverMap.setMinZoom(5);
-        //naverMap.setLocationSource(locationSource);
+//        naverMap.setLocationSource(locationSource);
+        ActivityCompat.requestPermissions(this,permissions, LOCATION_PERMISSION_REQUEST_CODE);
         naverMap.moveCamera(CameraUpdate.scrollTo(CENTER));
-//        Log.d("확인좀", "onMapReady: "+locationSource.toString());
-//        Log.d("확인좀", "onMapReady: "+locationSource.isActivated());
+        Log.d("확인좀", "onMapReady: "+locationSource.toString());
+        Log.d("확인좀", "onMapReady: "+locationSource.isActivated());
 //        Log.d("확인좀", "onMapReady: lat = "+Double.toString(locationSource.getLastLocation().getLatitude()));
 //        Log.d("확인좀", "onMapReady: lng = "+Double.toString(locationSource.getLastLocation().getLongitude()));
         myPath = new PathOverlay();
@@ -217,6 +219,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         String[] targets = new String[targetList.size()];
         targetList.toArray(targets);
 
-        ActivityCompat.requestPermissions(this,targets,LOCATION_PERMISSION_REQUEST_CODE);
+        if(targets.length>0) {
+            ActivityCompat.requestPermissions(this, targets, LOCATION_PERMISSION_REQUEST_CODE);
+        }
     }
 }

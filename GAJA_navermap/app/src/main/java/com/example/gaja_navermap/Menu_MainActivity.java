@@ -1,13 +1,19 @@
 package com.example.gaja_navermap;
 
 import android.Manifest;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.app.TabActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TabHost;
@@ -87,7 +93,7 @@ public class Menu_MainActivity extends TabActivity {
             currUser.SetCity(SaveSharedPreference.getUserCity(getApplicationContext()));
         }
         latlng = intent.getDoubleArrayExtra("latlng");
-        Log.d(this.getLocalClassName(), "onCreate: ("+Double.toString(latlng[0])+", "+Double.toString(latlng[1])+")");
+        //Log.d(this.getLocalClassName(), "onCreate: ("+Double.toString(latlng[0])+", "+Double.toString(latlng[1])+")");
 
         String[] permissions = {
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -113,9 +119,47 @@ public class Menu_MainActivity extends TabActivity {
 
         add_walk_button = (Button) findViewById(R.id.addRouteWalkButton);
         add_walk_button.setOnClickListener(new View.OnClickListener() {
+            Dialog dialog;
             @Override
             public void onClick(View view) {
+                dialog = new Dialog(Menu_MainActivity.this);
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog.setContentView(R.layout.route_walk_dialog);
 
+                showDialog();
+            }
+            private void showDialog(){
+                dialog.show();
+
+                Button saveBtn = dialog.findViewById(R.id.dialog_save_btn);
+                saveBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+
+                        // 여기에 산책로 이름 적는 다이얼로그 한번 더 띄운 후 산책로 DB 저장 기능 추가
+                        Toast.makeText(Menu_MainActivity.this,"저장되었습니다.",Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                Button hideBtn = dialog.findViewById(R.id.dialog_hide_btn);
+                hideBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                        Toast.makeText(Menu_MainActivity.this,"숨기기 완료 산책로를 계속 걸어주세요",Toast.LENGTH_LONG).show();
+                    }
+                });
+
+                Button cancelBtn = dialog.findViewById(R.id.dialog_cancel_btn);
+                cancelBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+
+                        Toast.makeText(Menu_MainActivity.this,"취소되었습니다.",Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
 
@@ -313,7 +357,7 @@ public class Menu_MainActivity extends TabActivity {
 
     private void makeNewContents(LinearLayout layout,String routeName,String nickname,int city,ArrayList<HashMap> dots){
         LinearLayout templl = new LinearLayout(getApplicationContext());
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.MATCH_PARENT);
         TextView usertv = new TextView(getApplicationContext());
         TextView routetv = new TextView(getApplicationContext());
         params.topMargin = 10;
@@ -327,7 +371,11 @@ public class Menu_MainActivity extends TabActivity {
         routetv.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.black));
         routetv.setGravity(Gravity.RIGHT);
 
-        templl.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
+        LinearLayout.LayoutParams item_params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        item_params.bottomMargin = 10;
+        templl.setBackgroundColor(Color.WHITE);
+        templl.setLayoutParams(item_params);
         templl.setOrientation(LinearLayout.VERTICAL);
         templl.setClickable(true);
         templl.setOnClickListener(new View.OnClickListener() {
@@ -352,6 +400,7 @@ public class Menu_MainActivity extends TabActivity {
         templl.addView(usertv,params);
         templl.addView(routetv,params);
 
+        layout.setBackgroundColor(Color.parseColor("#f2f2f2"));
         layout.addView(templl);
     }
 
